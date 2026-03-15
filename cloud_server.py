@@ -17,7 +17,7 @@ global_model  = None
 global_scaler = StandardScaler()
 
 
-# ── ROUTE 1: Receive data ──
+# -- ROUTE 1: Receive data --
 @app.route('/send-data', methods=['POST'])
 def receive_data():
     global global_model
@@ -47,7 +47,7 @@ def receive_data():
     return jsonify({"status": "success", "message": f"Data from {zone} received"}), 200
 
 
-# ── ROUTE 2: JSON data ──
+# -- ROUTE 2: JSON data --
 @app.route('/data', methods=['GET'])
 def get_data():
     return jsonify({
@@ -58,7 +58,7 @@ def get_data():
     }), 200
 
 
-# ── ROUTE 3: Global model ──
+# -- ROUTE 3: Global model --
 @app.route('/global-model', methods=['GET'])
 def get_global_model():
     if global_model is None:
@@ -66,7 +66,7 @@ def get_global_model():
     return jsonify({"status": "ready", "zones_used": list(zone_data.keys()), "total_readings": len(all_readings), "message": "Global model trained and ready!"}), 200
 
 
-# ── ROUTE 4: Clear data ──
+# -- ROUTE 4: Clear data --
 @app.route('/clear', methods=['GET'])
 def clear_data():
     global all_readings, zone_data, global_model
@@ -76,7 +76,7 @@ def clear_data():
     return jsonify({"status": "success", "message": "All data cleared. Total readings: 0"}), 200
 
 
-# ── ROUTE 5: Home ──
+# -- ROUTE 5: Home --
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({
@@ -92,32 +92,32 @@ def home():
     }), 200
 
 
-# ── ROUTE 6: DASHBOARD ──
+# -- ROUTE 6: DASHBOARD --
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    readings = all_readings
+    readings  = all_readings
     n_total   = len(readings)
     n_anomaly = sum(1 for r in readings if r.get("anomaly") == "ANOMALY")
     n_normal  = n_total - n_anomaly
     zones     = list(zone_data.keys())
-    gm_status = "Ready ✅" if global_model is not None else "Waiting for 2+ zones ⏳"
+    gm_status = "Ready" if global_model is not None else "Waiting for 2+ zones"
+    gm_color  = "#02C39A" if global_model is not None else "#FF8C00"
+    gm_bg     = "#003D2B" if global_model is not None else "#3D1A00"
 
-    # Build chart data
-    labels     = [r.get("timestamp", "")[-8:] for r in readings]
-    ph_vals    = [r.get("ph")        or 0 for r in readings]
-    tds_vals   = [r.get("tds")       or 0 for r in readings]
-    turb_vals  = [r.get("turbidity") or 0 for r in readings]
-    wqi_vals   = [r.get("wqi")       or 0 for r in readings]
-    anomalies  = [r.get("anomaly")        for r in readings]
+    labels    = [r.get("timestamp", "")[-8:] for r in readings]
+    ph_vals   = [r.get("ph")        or 0 for r in readings]
+    tds_vals  = [r.get("tds")       or 0 for r in readings]
+    turb_vals = [r.get("turbidity") or 0 for r in readings]
+    wqi_vals  = [r.get("wqi")       or 0 for r in readings]
+    anomalies = [r.get("anomaly")       for r in readings]
 
-    # Table rows
     table_rows = ""
     for r in reversed(readings[-50:]):
         is_anomaly = r.get("anomaly") == "ANOMALY"
-        row_class  = 'style="background:#3D0000;color:#FF6B6B;"' if is_anomaly else ''
-        badge      = '<span style="background:#FF4444;padding:2px 8px;border-radius:10px;font-size:11px;">ANOMALY</span>' if is_anomaly else '<span style="background:#00A86B;padding:2px 8px;border-radius:10px;font-size:11px;">NORMAL</span>'
+        row_style  = 'style="background:#3D0000;color:#FF6B6B;"' if is_anomaly else ''
+        badge      = '<span style="background:#FF4444;padding:2px 10px;border-radius:10px;font-size:11px;color:#fff;">ANOMALY</span>' if is_anomaly else '<span style="background:#00A86B;padding:2px 10px;border-radius:10px;font-size:11px;color:#fff;">NORMAL</span>'
         table_rows += f"""
-        <tr {row_class}>
+        <tr {row_style}>
             <td>{r.get('received_at','')}</td>
             <td>{r.get('zone','')}</td>
             <td>{r.get('ph','')}</td>
@@ -137,36 +137,35 @@ def dashboard():
 <style>
   * {{ margin:0; padding:0; box-sizing:border-box; }}
   body {{ background:#0A0F1E; color:#E0E6F0; font-family:Arial,sans-serif; padding:20px; }}
-  h1 {{ text-align:center; color:#02C39A; font-size:24px; margin-bottom:6px; }}
-  .subtitle {{ text-align:center; color:#64748B; font-size:13px; margin-bottom:20px; }}
+  h1 {{ text-align:center; color:#02C39A; font-size:24px; margin-bottom:6px; letter-spacing:1px; }}
+  .subtitle {{ text-align:center; color:#64748B; font-size:12px; margin-bottom:24px; }}
   .cards {{ display:flex; gap:15px; margin-bottom:20px; flex-wrap:wrap; }}
-  .card {{ flex:1; min-width:160px; background:#161B2E; border-radius:10px; padding:16px; text-align:center; border:1px solid #1E293B; }}
-  .card .num {{ font-size:36px; font-weight:bold; }}
-  .card .lbl {{ font-size:12px; color:#64748B; margin-top:4px; }}
-  .card.green .num {{ color:#02C39A; }}
-  .card.red .num {{ color:#FF4444; }}
-  .card.blue .num {{ color:#4FC3F7; }}
+  .card {{ flex:1; min-width:150px; background:#161B2E; border-radius:10px; padding:18px; text-align:center; border:1px solid #1E293B; }}
+  .card .num {{ font-size:38px; font-weight:bold; }}
+  .card .lbl {{ font-size:12px; color:#64748B; margin-top:5px; }}
+  .card.blue   .num {{ color:#4FC3F7; }}
+  .card.green  .num {{ color:#02C39A; }}
+  .card.red    .num {{ color:#FF4444; }}
   .card.yellow .num {{ color:#FFD700; }}
-  .charts {{ display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px; }}
+  .charts {{ display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:24px; }}
   .chart-box {{ background:#161B2E; border-radius:10px; padding:16px; border:1px solid #1E293B; }}
-  .chart-box h3 {{ color:#02C39A; font-size:14px; margin-bottom:10px; }}
+  .chart-title {{ color:#4FC3F7; font-size:13px; font-weight:bold; margin-bottom:10px; }}
+  .gm-row {{ background:#161B2E; border-radius:10px; padding:16px; margin-bottom:20px; border:1px solid #1E293B; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }}
+  .gm-label {{ font-size:14px; font-weight:bold; color:#4FC3F7; margin-bottom:4px; }}
+  .gm-zones {{ font-size:12px; color:#64748B; }}
+  .gm-badge {{ padding:6px 18px; border-radius:20px; font-size:13px; font-weight:bold; background:{gm_bg}; color:{gm_color}; border:1px solid {gm_color}; }}
+  .section-title {{ color:#4FC3F7; font-size:15px; font-weight:bold; margin-bottom:10px; }}
   table {{ width:100%; border-collapse:collapse; background:#161B2E; border-radius:10px; overflow:hidden; }}
-  th {{ background:#1C7293; padding:10px; font-size:12px; text-align:left; }}
-  td {{ padding:8px 10px; font-size:12px; border-bottom:1px solid #1E293B; }}
-  .section-title {{ color:#4FC3F7; font-size:16px; margin-bottom:10px; font-weight:bold; }}
-  .gm-badge {{ display:inline-block; padding:6px 16px; border-radius:20px; font-size:13px; font-weight:bold;
-               background:{"#003D2B" if global_model else "#3D1A00"}; color:{"#02C39A" if global_model else "#FF8C00"};
-               border:1px solid {"#02C39A" if global_model else "#FF8C00"}; }}
-  .zones {{ color:#4FC3F7; }}
+  th {{ background:#1C7293; padding:10px 12px; font-size:12px; text-align:left; color:#fff; }}
+  td {{ padding:8px 12px; font-size:12px; border-bottom:1px solid #1E293B; }}
   @media(max-width:600px) {{ .charts {{ grid-template-columns:1fr; }} }}
 </style>
 </head>
 <body>
 
-<h1>💧 Water Quality Monitoring Dashboard</h1>
+<h1>Water Quality Monitoring Dashboard</h1>
 <p class="subtitle">Critical Water Infrastructure Anomaly Detection | Batch 20 | Auto-refreshes every 30 seconds</p>
 
-<!-- STAT CARDS -->
 <div class="cards">
   <div class="card blue"><div class="num">{n_total}</div><div class="lbl">Total Readings</div></div>
   <div class="card green"><div class="num">{n_normal}</div><div class="lbl">Normal</div></div>
@@ -174,54 +173,36 @@ def dashboard():
   <div class="card yellow"><div class="num">{len(zones)}</div><div class="lbl">Zones Connected</div></div>
 </div>
 
-<!-- GLOBAL MODEL STATUS -->
-<div style="background:#161B2E;border-radius:10px;padding:16px;margin-bottom:20px;border:1px solid #1E293B;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+<div class="gm-row">
   <div>
-    <div class="section-title">🌍 Global Model (Federated Learning)</div>
-    <div class="zones">Zones: {', '.join(zones) if zones else 'None connected yet'}</div>
+    <div class="gm-label">Global Model - Federated Learning</div>
+    <div class="gm-zones">Zones: {', '.join(zones) if zones else 'None connected yet'}</div>
   </div>
   <div class="gm-badge">{gm_status}</div>
 </div>
 
-<!-- CHARTS -->
 <div class="charts">
-  <div class="chart-box">
-    <h3>📈 pH Over Time</h3>
-    <canvas id="phChart" height="140"></canvas>
-  </div>
-  <div class="chart-box">
-    <h3>📈 WQI Over Time</h3>
-    <canvas id="wqiChart" height="140"></canvas>
-  </div>
-  <div class="chart-box">
-    <h3>📈 TDS Over Time</h3>
-    <canvas id="tdsChart" height="140"></canvas>
-  </div>
-  <div class="chart-box">
-    <h3>📈 Turbidity (NTU) Over Time</h3>
-    <canvas id="turbChart" height="140"></canvas>
-  </div>
+  <div class="chart-box"><div class="chart-title">pH Over Time</div><canvas id="phChart" height="140"></canvas></div>
+  <div class="chart-box"><div class="chart-title">WQI Over Time</div><canvas id="wqiChart" height="140"></canvas></div>
+  <div class="chart-box"><div class="chart-title">TDS Over Time</div><canvas id="tdsChart" height="140"></canvas></div>
+  <div class="chart-box"><div class="chart-title">Turbidity (NTU) Over Time</div><canvas id="turbChart" height="140"></canvas></div>
 </div>
 
-<!-- TABLE -->
-<div class="section-title">📋 Recent Readings (Last 50)</div>
+<div class="section-title">Recent Readings (Last 50)</div>
 <table>
   <thead>
-    <tr>
-      <th>Time</th><th>Zone</th><th>pH</th><th>TDS</th><th>NTU</th><th>WQI</th><th>Status</th>
-    </tr>
+    <tr><th>Time</th><th>Zone</th><th>pH</th><th>TDS</th><th>NTU</th><th>WQI</th><th>Status</th></tr>
   </thead>
   <tbody>{table_rows}</tbody>
 </table>
 
 <script>
-const labels = {labels};
-const phVals = {ph_vals};
-const tdsVals = {tds_vals};
-const turbVals = {turb_vals};
-const wqiVals = {wqi_vals};
+const labels    = {labels};
+const phVals    = {ph_vals};
+const tdsVals   = {tds_vals};
+const turbVals  = {turb_vals};
+const wqiVals   = {wqi_vals};
 const anomalies = {anomalies};
-
 const pointColors = anomalies.map(a => a === 'ANOMALY' ? '#FF4444' : '#02C39A');
 
 function makeChart(id, label, data, color) {{
@@ -243,24 +224,24 @@ function makeChart(id, label, data, color) {{
     options: {{
       plugins: {{ legend: {{ labels: {{ color:'#E0E6F0', font:{{ size:11 }} }} }} }},
       scales: {{
-        x: {{ ticks: {{ color:'#64748B', maxTicksLimit:8, font:{{size:9}} }}, grid:{{ color:'#1E293B' }} }},
-        y: {{ ticks: {{ color:'#64748B', font:{{size:10}} }}, grid:{{ color:'#1E293B' }} }}
+        x: {{ ticks: {{ color:'#64748B', maxTicksLimit:8, font:{{ size:9 }} }}, grid:{{ color:'#1E293B' }} }},
+        y: {{ ticks: {{ color:'#64748B', font:{{ size:10 }} }}, grid:{{ color:'#1E293B' }} }}
       }}
     }}
   }});
 }}
 
-makeChart('phChart',   'pH',          phVals,   '#4FC3F7');
-makeChart('wqiChart',  'WQI',         wqiVals,  '#02C39A');
-makeChart('tdsChart',  'TDS (ppm)',    tdsVals,  '#FFD700');
-makeChart('turbChart', 'Turbidity',   turbVals, '#FF8C00');
+makeChart('phChart',   'pH',        phVals,   '#4FC3F7');
+makeChart('wqiChart',  'WQI',       wqiVals,  '#02C39A');
+makeChart('tdsChart',  'TDS (ppm)', tdsVals,  '#FFD700');
+makeChart('turbChart', 'Turbidity', turbVals, '#FF8C00');
 </script>
 </body>
 </html>"""
     return html
 
 
-# ── Federated Averaging ──
+# -- Federated Averaging --
 def build_global_model():
     global global_model, global_scaler
     all_zone_data = []
