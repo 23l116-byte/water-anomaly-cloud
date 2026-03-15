@@ -554,7 +554,7 @@ def dashboard():
 <!-- GLOBAL MODEL -->
 <div class="gm-row">
   <div>
-    <div class="gm-label">Global Model &mdash; Federated Learning</div>
+    <div class="gm-label">Global Model</div>
     <div class="gm-zones">Zones Connected: {', '.join(zones) if zones else 'None'}</div>
   </div>
   <div class="gm-badge">{gm_status}</div>
