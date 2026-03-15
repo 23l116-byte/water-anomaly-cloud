@@ -102,7 +102,6 @@ def dashboard():
     gm_bg     = "#003D2B" if global_model is not None else "#3D1A00"
 
     from collections import Counter
-    import json as _json
     sev_counts = Counter(r.get("severity", "NORMAL") for r in readings)
 
     # Summary stats
@@ -127,9 +126,8 @@ def dashboard():
     pct_critical = round(sev_counts.get("CRITICAL",0)/total_nz*100)
 
     from datetime import datetime, timezone, timedelta as _dt
-    from datetime import timezone, timedelta
     IST = timezone(timedelta(hours=5, minutes=30))
-    last_updated = _dt.now(IST).strftime("%d %b %Y  %H:%M:%S IST")
+    last_updated = datetime.now(IST).strftime("%d %b %Y  %H:%M:%S IST")
 
     wqi_alerts      = [r for r in readings if r.get("wqi_flag") == 1][-10:]
     behav_alerts    = [r for r in readings if r.get("prediction") == -1][-10:]
