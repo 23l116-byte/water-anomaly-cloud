@@ -127,7 +127,9 @@ def dashboard():
     pct_critical = round(sev_counts.get("CRITICAL",0)/total_nz*100)
 
     from datetime import datetime as _dt
-    last_updated = _dt.now().strftime("%d %b %Y  %H:%M:%S")
+    from datetime import timezone, timedelta
+    IST = timezone(timedelta(hours=5, minutes=30))
+    last_updated = _dt.now(IST).strftime("%d %b %Y  %H:%M:%S IST")
 
     wqi_alerts      = [r for r in readings if r.get("wqi_flag") == 1][-10:]
     behav_alerts    = [r for r in readings if r.get("prediction") == -1][-10:]
