@@ -366,7 +366,7 @@ def dashboard():
       </svg>
     </div>
     <div class="sev-num" style="color:#4FC3F7;">{advisory_count}</div>
-    <div class="sev-lbl" style="color:#4FC3F7;">Advisory</div>
+    <div class="sev-lbl" style="color:#4FC3F7;">Anomaly</div>
   </div>
 
   <div class="sev-item" style="border-color:#FF6D00;background:#1A0800;{"border-width:2px;" if has_caution else ""}">
