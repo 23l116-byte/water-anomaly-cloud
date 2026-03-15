@@ -7,7 +7,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 app = Flask(__name__)
 
@@ -35,7 +35,7 @@ def receive_data():
         "streak":        data.get("streak", 0),
         "severity":      data.get("severity", "NORMAL"),
         "anomaly":       data.get("anomaly", "NORMAL"),
-        "received_at":   datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "received_at":   datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime("%Y-%m-%d %H:%M:%S")
     }
     all_readings.append(reading)
     if zone not in zone_data:
@@ -126,7 +126,7 @@ def dashboard():
     pct_warning  = round(sev_counts.get("WARNING", 0)/total_nz*100)
     pct_critical = round(sev_counts.get("CRITICAL",0)/total_nz*100)
 
-    from datetime import datetime as _dt
+    from datetime import datetime, timezone, timedelta as _dt
     from datetime import timezone, timedelta
     IST = timezone(timedelta(hours=5, minutes=30))
     last_updated = _dt.now(IST).strftime("%d %b %Y  %H:%M:%S IST")
