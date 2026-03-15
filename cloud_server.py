@@ -1,9 +1,7 @@
 """
 CLOUD SERVER - Runs on Railway
 ================================
-Receives pH, TDS, Turbidity, WQI, Anomaly + model weights from laptop
-Stores all data
-Builds Global Model using Federated Averaging
+Fixed: Global model activates when 2+ zones send data
 """
 
 from flask import Flask, request, jsonify
@@ -17,7 +15,7 @@ app = Flask(__name__)
 
 # ── In-memory storage ──
 all_readings  = []
-zone_weights  = {}
+zone_data     = {}   # stores readings per zone
 global_model  = None
 global_scaler = StandardScaler()
 
@@ -28,12 +26,13 @@ global_scaler = StandardScaler()
 # ─────────────────────────────────────────────
 @app.route('/send-data', methods=['POST'])
 def receive_data():
-    global global_model, zone_weights
+    global global_model
 
     data = request.get_json()
+    zone = data.get("zone", "Unknown")
 
     reading = {
-        "zone":        data.get("zone"),
+        "zone":        zone,
         "timestamp":   data.get("timestamp"),
         "ph":          data.get("ph"),
         "tds":         data.get("tds"),
@@ -44,15 +43,21 @@ def receive_data():
     }
     all_readings.append(reading)
 
-    zone    = data.get("zone")
-    weights = data.get("model_weights")
-    if weights:
-        zone_weights[zone] = np.array(weights)
+    # Store readings per zone
+    if zone not in zone_data:
+        zone_data[zone] = []
+    zone_data[zone].append([
+        data.get("ph", 0),
+        data.get("tds", 0),
+        data.get("turbidity") or data.get("ntu") or 0,
+        data.get("wqi", 0)
+    ])
 
-    print(f"[{reading['received_at']}] {zone} | pH={reading['ph']} TDS={reading['tds']} "
-          f"Turbidity={reading['turbidity']} WQI={reading['wqi']} Anomaly={reading['anomaly']}")
+    print(f"[{reading['received_at']}] {zone} | pH={reading['ph']} "
+          f"TDS={reading['tds']} WQI={reading['wqi']} Anomaly={reading['anomaly']}")
 
-    if len(zone_weights) >= 2:
+    # Build global model when 2+ zones have data
+    if len(zone_data) >= 2:
         build_global_model()
 
     return jsonify({"status": "success", "message": f"Data from {zone} received"}), 200
@@ -65,10 +70,10 @@ def receive_data():
 @app.route('/data', methods=['GET'])
 def get_data():
     return jsonify({
-        "total_readings":    len(all_readings),
-        "zones_connected":   list(zone_weights.keys()),
+        "total_readings":     len(all_readings),
+        "zones_connected":    list(zone_data.keys()),
         "global_model_ready": global_model is not None,
-        "readings":          all_readings[-20:]
+        "readings":           all_readings[-20:]
     }), 200
 
 
@@ -81,14 +86,14 @@ def get_global_model():
     if global_model is None:
         return jsonify({
             "status":  "not ready",
-            "message": f"Need at least 2 zones. Currently have: {list(zone_weights.keys())}"
+            "message": f"Need at least 2 zones. Currently have: {list(zone_data.keys())}"
         }), 200
 
     return jsonify({
         "status":         "ready",
-        "zones_used":     list(zone_weights.keys()),
+        "zones_used":     list(zone_data.keys()),
         "total_readings": len(all_readings),
-        "message":        "Global model is trained and ready"
+        "message":        "Global model trained and ready!"
     }), 200
 
 
@@ -98,14 +103,14 @@ def get_global_model():
 # ─────────────────────────────────────────────
 @app.route('/clear', methods=['GET'])
 def clear_data():
-    global all_readings, zone_weights, global_model
+    global all_readings, zone_data, global_model
     all_readings = []
-    zone_weights = {}
+    zone_data    = {}
     global_model = None
     print("[CLOUD] All data cleared!")
     return jsonify({
         "status":  "success",
-        "message": "All data cleared successfully. Total readings: 0"
+        "message": "All data cleared. Total readings: 0"
     }), 200
 
 
@@ -129,25 +134,31 @@ def home():
 
 # ─────────────────────────────────────────────
 # FEDERATED AVERAGING
+# Combines data from all zones → Global Model
 # ─────────────────────────────────────────────
 def build_global_model():
     global global_model, global_scaler
 
-    print(f"\n[CLOUD] Building Global Model from {len(zone_weights)} zones...")
+    print(f"\n[CLOUD] Building Global Model from {len(zone_data)} zones: {list(zone_data.keys())}")
 
-    all_weights      = list(zone_weights.values())
-    averaged_weights = np.mean(all_weights, axis=0)
+    # Combine all zone data
+    all_zone_data = []
+    for zone, readings in zone_data.items():
+        all_zone_data.extend(readings)
 
-    np.random.seed(42)
-    synthetic_data = np.random.randn(300, 3) * averaged_weights[:3] if len(averaged_weights) >= 3 else np.random.randn(300, 3)
+    combined = np.array(all_zone_data)
 
-    global_scaler.fit(synthetic_data)
-    scaled = global_scaler.transform(synthetic_data)
+    global_scaler = StandardScaler()
+    scaled = global_scaler.fit_transform(combined)
 
-    global_model = IsolationForest(n_estimators=100, contamination=0.05, random_state=42)
+    global_model = IsolationForest(
+        n_estimators=100,
+        contamination=0.05,
+        random_state=42
+    )
     global_model.fit(scaled)
 
-    print(f"[CLOUD] Global Model ready! Zones: {list(zone_weights.keys())}\n")
+    print(f"[CLOUD] Global Model ready! Zones: {list(zone_data.keys())} | Samples: {len(combined)}\n")
 
 
 # ─────────────────────────────────────────────
