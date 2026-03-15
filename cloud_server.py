@@ -445,15 +445,6 @@ def dashboard():
 
 <div class="last-updated"><span class="live-dot"></span>Last updated: {last_updated} &nbsp;|&nbsp; Auto-refreshes every 30 seconds</div>
 
-<!-- SUMMARY STATS ROW -->
-<div class="stats-row">
-  <div class="stat-mini"><div class="sm-label">Avg pH</div><div class="sm-val" style="color:#4FC3F7;">{ph_avg}</div></div>
-  <div class="stat-mini"><div class="sm-label">pH Range</div><div class="sm-val" style="color:#4FC3F7;">{ph_min} &ndash; {ph_max}</div></div>
-  <div class="stat-mini"><div class="sm-label">Avg TDS (ppm)</div><div class="sm-val" style="color:#FFD700;">{tds_avg}</div></div>
-  <div class="stat-mini"><div class="sm-label">Avg WQI</div><div class="sm-val" style="color:#02C39A;">{wqi_avg}</div></div>
-  <div class="stat-mini"><div class="sm-label">WQI Range</div><div class="sm-val" style="color:#02C39A;">{wqi_min} &ndash; {wqi_max}</div></div>
-</div>
-
 <!-- CRITICAL ANIMATED BANNER -->
 <div class="banner-critical">
   <div class="ring">
