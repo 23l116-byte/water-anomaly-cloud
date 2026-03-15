@@ -109,7 +109,6 @@ def dashboard():
     critical_alerts = [r for r in readings if r.get("severity") == "CRITICAL"][-10:]
     caution_alerts  = [r for r in readings if r.get("severity") == "CAUTION"][-10:]
 
-    # Active alert banners
     has_caution  = sev_counts.get("CAUTION",  0) > 0
     has_critical = sev_counts.get("CRITICAL", 0) > 0
 
@@ -120,16 +119,17 @@ def dashboard():
     wqi_vals   = [r.get("wqi")       or 0 for r in readings]
     severities = [r.get("severity", "NORMAL") for r in readings]
 
+    # WATCH → ADVISORY
     badge_map = {
         "NORMAL":   '<span style="background:#006644;padding:2px 9px;border-radius:8px;font-size:10px;color:#fff;font-weight:bold;">NORMAL</span>',
-        "WATCH":    '<span style="background:#0D47A1;padding:2px 9px;border-radius:8px;font-size:10px;color:#fff;font-weight:bold;">WATCH</span>',
+        "ADVISORY": '<span style="background:#0D47A1;padding:2px 9px;border-radius:8px;font-size:10px;color:#fff;font-weight:bold;">ADVISORY</span>',
         "CAUTION":  '<span style="background:#BF360C;padding:2px 9px;border-radius:8px;font-size:10px;color:#fff;font-weight:bold;">CAUTION</span>',
         "WARNING":  '<span style="background:#F57F17;padding:2px 9px;border-radius:8px;font-size:10px;color:#000;font-weight:bold;">WARNING</span>',
         "CRITICAL": '<span style="background:#B71C1C;padding:2px 9px;border-radius:8px;font-size:10px;color:#fff;font-weight:bold;">CRITICAL</span>'
     }
     row_bg_map = {
         "NORMAL":   "",
-        "WATCH":    'style="background:#0A1628;color:#90CAF9;"',
+        "ADVISORY": 'style="background:#0A1628;color:#90CAF9;"',
         "CAUTION":  'style="background:#2D1200;color:#FFAB76;"',
         "WARNING":  'style="background:#2D2200;color:#FFE082;"',
         "CRITICAL": 'style="background:#2D0000;color:#FF8A80;"'
@@ -138,8 +138,10 @@ def dashboard():
     table_rows = ""
     for r in reversed(readings[-50:]):
         sev = r.get("severity", "NORMAL")
+        # map WATCH to ADVISORY in display
+        sev_display = "ADVISORY" if sev == "WATCH" else sev
         table_rows += f"""
-        <tr {row_bg_map.get(sev,"")}>
+        <tr {row_bg_map.get(sev_display, row_bg_map.get(sev, ""))}>
             <td>{r.get('received_at','')}</td>
             <td>{r.get('zone','')}</td>
             <td>{r.get('ph','')}</td>
@@ -149,7 +151,7 @@ def dashboard():
             <td>{r.get('wqi_flag','')}</td>
             <td>{r.get('anomaly_score','')}</td>
             <td>{r.get('streak','')}</td>
-            <td>{badge_map.get(sev,'')}</td>
+            <td>{badge_map.get(sev_display, badge_map.get(sev,''))}</td>
         </tr>"""
 
     def wqi_rows(alerts):
@@ -184,6 +186,8 @@ def dashboard():
             rows += f"<tr><td>{r.get('received_at','')}</td><td>{r.get('zone','')}</td><td>{r.get('anomaly_score','')}</td><td style='color:#FF8C00;font-weight:bold;'>{r.get('streak','')}</td></tr>"
         return rows
 
+    advisory_count = sev_counts.get("WATCH", 0) + sev_counts.get("ADVISORY", 0)
+
     html = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -197,22 +201,57 @@ def dashboard():
   h1{{text-align:center;color:#02C39A;font-size:22px;margin-bottom:4px;letter-spacing:1px;}}
   .subtitle{{text-align:center;color:#64748B;font-size:11px;margin-bottom:20px;}}
 
-  /* ALERT BANNERS */
+  /* ── CRITICAL ANIMATED BANNER ── */
+  @keyframes pulse-border {{
+    0%,100% {{ box-shadow: 0 0 0 0 rgba(255,23,68,0.7); border-color:#FF1744; }}
+    50%      {{ box-shadow: 0 0 0 12px rgba(255,23,68,0); border-color:#FF6B6B; }}
+  }}
+  @keyframes blink-text {{
+    0%,100% {{ opacity:1; }}
+    50%      {{ opacity:0.4; }}
+  }}
+  @keyframes shake {{
+    0%,100% {{ transform:translateX(0); }}
+    20%     {{ transform:translateX(-4px); }}
+    40%     {{ transform:translateX(4px); }}
+    60%     {{ transform:translateX(-3px); }}
+    80%     {{ transform:translateX(3px); }}
+  }}
+  @keyframes spin-icon {{
+    0%   {{ transform:rotate(0deg); }}
+    100% {{ transform:rotate(360deg); }}
+  }}
+
   .banner-critical{{
-    background:#1A0000;border:2px solid #FF1744;border-radius:10px;
-    padding:16px 20px;margin-bottom:14px;
+    background:#1A0000;
+    border:2px solid #FF1744;
+    border-radius:10px;
+    padding:16px 20px;
+    margin-bottom:14px;
     display:{"flex" if has_critical else "none"};
     align-items:center;gap:16px;
+    animation: pulse-border 1.4s ease-in-out infinite, shake 0.6s ease-in-out 0s 3;
   }}
+  .banner-critical .banner-title{{
+    font-size:16px;font-weight:bold;
+    color:#FF1744;
+    animation: blink-text 1s ease-in-out infinite;
+  }}
+  .banner-critical .ring{{
+    width:48px;height:48px;border-radius:50%;
+    border:3px solid #FF1744;
+    display:flex;align-items:center;justify-content:center;
+    animation: pulse-border 1s ease-in-out infinite;
+    flex-shrink:0;
+  }}
+
   .banner-caution{{
     background:#1A0800;border:2px solid #FF6D00;border-radius:10px;
     padding:16px 20px;margin-bottom:14px;
     display:{"flex" if has_caution else "none"};
     align-items:center;gap:16px;
   }}
-  .banner-icon{{font-size:36px;line-height:1;}}
-  .banner-text .banner-title{{font-size:16px;font-weight:bold;margin-bottom:4px;}}
-  .banner-text .banner-sub{{font-size:12px;color:#aaa;}}
+  .banner-text .banner-sub{{font-size:12px;color:#aaa;margin-top:3px;}}
 
   /* STAT CARDS */
   .cards{{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}}
@@ -220,12 +259,19 @@ def dashboard():
   .card .num{{font-size:32px;font-weight:bold;}}
   .card .lbl{{font-size:10px;color:#64748B;margin-top:4px;}}
 
-  /* SEVERITY ICONS ROW */
+  /* SEVERITY PICTOGRAPH */
   .sev-row{{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}}
   .sev-item{{flex:1;min-width:110px;border-radius:10px;padding:12px;text-align:center;border:1px solid;}}
-  .sev-item .sev-icon{{font-size:28px;margin-bottom:4px;}}
+  .sev-item .sev-icon{{margin-bottom:4px;}}
   .sev-item .sev-num{{font-size:24px;font-weight:bold;}}
   .sev-item .sev-lbl{{font-size:10px;margin-top:2px;}}
+
+  /* CRITICAL SEV CARD ANIMATION */
+  @keyframes pulse-card {{
+    0%,100% {{ box-shadow:0 0 0 0 rgba(255,23,68,0.6); }}
+    50%      {{ box-shadow:0 0 16px 4px rgba(255,23,68,0.25); }}
+  }}
+  .sev-critical-active{{animation: pulse-card 1.4s ease-in-out infinite;}}
 
   /* GLOBAL MODEL */
   .gm-row{{background:#161B2E;border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid #1E293B;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}}
@@ -259,28 +305,32 @@ def dashboard():
 <h1>Water Quality Monitoring Dashboard</h1>
 <p class="subtitle">Critical Water Infrastructure Anomaly Detection &nbsp;|&nbsp; Batch 20 &nbsp;|&nbsp; Auto-refreshes every 30 seconds</p>
 
-<!-- CRITICAL BANNER -->
+<!-- CRITICAL ANIMATED BANNER -->
 <div class="banner-critical">
-  <div class="banner-icon" style="color:#FF1744;">
-    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#FF1744" stroke-width="2.2">
-      <polygon points="12 2 22 20 2 20"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.8" fill="#FF1744"/>
+  <div class="ring">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF1744" stroke-width="2.5">
+      <polygon points="12 2 22 20 2 20"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <circle cx="12" cy="17" r="0.8" fill="#FF1744"/>
     </svg>
   </div>
   <div class="banner-text">
-    <div class="banner-title" style="color:#FF1744;">IMMEDIATE ATTENTION REQUIRED</div>
-    <div class="banner-sub">Critical anomaly confirmed across multiple detection layers. Sustained deviation detected. Investigate affected zones immediately.</div>
+    <div class="banner-title">IMMEDIATE ATTENTION REQUIRED</div>
+    <div class="banner-sub">Critical anomaly confirmed. Both detection layers have triggered with a sustained streak. Investigate affected zones immediately.</div>
   </div>
 </div>
 
 <!-- CAUTION BANNER -->
 <div class="banner-caution">
-  <div class="banner-icon" style="color:#FF6D00;">
-    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2.2">
-      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.8" fill="#FF6D00"/>
+  <div style="flex-shrink:0;">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <circle cx="12" cy="16" r="0.8" fill="#FF6D00"/>
     </svg>
   </div>
   <div class="banner-text">
-    <div class="banner-title" style="color:#FF6D00;">ATTENTION REQUIRED &mdash; ALERT</div>
+    <div class="banner-title" style="color:#FF6D00;font-size:15px;font-weight:bold;">ATTENTION REQUIRED &mdash; ALERT</div>
     <div class="banner-sub">Sustained behavioural deviation detected across 3 or more consecutive readings. Regulatory limits are currently met. Monitor closely.</div>
   </div>
 </div>
@@ -289,7 +339,7 @@ def dashboard():
 <div class="cards">
   <div class="card" style="border-color:#4FC3F7;"><div class="num" style="color:#4FC3F7;">{n_total}</div><div class="lbl">Total Readings</div></div>
   <div class="card" style="border-color:#1E293B;"><div class="num" style="color:#FFD700;">{len(zones)}</div><div class="lbl">Zones Connected</div></div>
-  <div class="card" style="border-color:#1E293B;"><div class="num" style="color:#{"FF1744" if has_critical else "02C39A"}">{sev_counts.get("NORMAL",0)}</div><div class="lbl">Normal</div></div>
+  <div class="card" style="border-color:#1E293B;"><div class="num" style="color:#02C39A;">{sev_counts.get("NORMAL",0)}</div><div class="lbl">Normal</div></div>
 </div>
 
 <!-- SEVERITY PICTOGRAPH ROW -->
@@ -299,7 +349,8 @@ def dashboard():
   <div class="sev-item" style="border-color:#02C39A;background:#001A10;">
     <div class="sev-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#02C39A" stroke-width="2">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
       </svg>
     </div>
     <div class="sev-num" style="color:#02C39A;">{sev_counts.get("NORMAL",0)}</div>
@@ -309,17 +360,21 @@ def dashboard():
   <div class="sev-item" style="border-color:#4FC3F7;background:#001428;">
     <div class="sev-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4FC3F7" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#4FC3F7"/>
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <circle cx="12" cy="16" r="1" fill="#4FC3F7"/>
       </svg>
     </div>
-    <div class="sev-num" style="color:#4FC3F7;">{sev_counts.get("WATCH",0)}</div>
-    <div class="sev-lbl" style="color:#4FC3F7;">Watch</div>
+    <div class="sev-num" style="color:#4FC3F7;">{advisory_count}</div>
+    <div class="sev-lbl" style="color:#4FC3F7;">Advisory</div>
   </div>
 
   <div class="sev-item" style="border-color:#FF6D00;background:#1A0800;{"border-width:2px;" if has_caution else ""}">
     <div class="sev-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#FF6D00"/>
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <circle cx="12" cy="16" r="1" fill="#FF6D00"/>
       </svg>
     </div>
     <div class="sev-num" style="color:#FF6D00;">{sev_counts.get("CAUTION",0)}</div>
@@ -329,17 +384,21 @@ def dashboard():
   <div class="sev-item" style="border-color:#FFD700;background:#1A1200;">
     <div class="sev-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2">
-        <polygon points="12 2 22 20 2 20"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="1" fill="#FFD700"/>
+        <polygon points="12 2 22 20 2 20"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <circle cx="12" cy="17" r="1" fill="#FFD700"/>
       </svg>
     </div>
     <div class="sev-num" style="color:#FFD700;">{sev_counts.get("WARNING",0)}</div>
     <div class="sev-lbl" style="color:#FFD700;">Warning</div>
   </div>
 
-  <div class="sev-item" style="border-color:#FF1744;background:#1A0000;{"border-width:2px;" if has_critical else ""}">
+  <div class="sev-item {"sev-critical-active" if has_critical else ""}" style="border-color:#FF1744;background:#1A0000;{"border-width:2px;" if has_critical else ""}">
     <div class="sev-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF1744" stroke-width="2.5">
-        <polygon points="12 2 22 20 2 20"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="1" fill="#FF1744"/>
+        <polygon points="12 2 22 20 2 20"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <circle cx="12" cy="17" r="1" fill="#FF1744"/>
       </svg>
     </div>
     <div class="sev-num" style="color:#FF1744;">{sev_counts.get("CRITICAL",0)}</div>
@@ -377,7 +436,7 @@ def dashboard():
     </table>
   </div>
 
-  <div class="alert-box" style="border-color:#FF1744;">
+  <div class="alert-box" style="border-color:#FF1744;{"animation:pulse-border 1.4s ease-in-out infinite;" if has_critical else ""}">
     <h3 style="color:#FF1744;">Critical &mdash; Confirmed Contamination Event</h3>
     <table>
       <tr><th style="color:#FF1744;">Time</th><th style="color:#FF1744;">Zone</th><th style="color:#FF1744;">pH</th><th style="color:#FF1744;">TDS</th><th style="color:#FF1744;">WQI</th><th style="color:#FF1744;">Score</th></tr>
@@ -425,7 +484,7 @@ const tdsVals   = {tds_vals};
 const turbVals  = {turb_vals};
 const wqiVals   = {wqi_vals};
 const sevs      = {severities};
-const colorMap  = {{NORMAL:'#02C39A',WATCH:'#4FC3F7',CAUTION:'#FF6D00',WARNING:'#FFD700',CRITICAL:'#FF1744'}};
+const colorMap  = {{NORMAL:'#02C39A',WATCH:'#4FC3F7',ADVISORY:'#4FC3F7',CAUTION:'#FF6D00',WARNING:'#FFD700',CRITICAL:'#FF1744'}};
 const ptColors  = sevs.map(s => colorMap[s] || '#02C39A');
 
 function makeChart(id, label, data, color) {{
