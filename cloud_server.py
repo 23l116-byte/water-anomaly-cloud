@@ -129,10 +129,10 @@ def dashboard():
     }
     row_bg_map = {
         "NORMAL":   "",
-        "ANOMALY": 'style="background:#0A1628;color:#90CAF9;"',
-        "CAUTION":  'style="background:#2D1200;color:#FFAB76;"',
-        "WARNING":  'style="background:#2D2200;color:#FFE082;"',
-        "CRITICAL": 'style="background:#2D0000;color:#FF8A80;"'
+        "ANOMALY": 'style="background:#EFF6FF;color:#90CAF9;"',
+        "CAUTION":  'style="background:#FFF3E0;color:#FFAB76;"',
+        "WARNING":  'style="background:#FFFDE7;color:#FFE082;"',
+        "CRITICAL": 'style="background:#FFEBEE;color:#FF8A80;"'
     }
 
     table_rows = ""
@@ -197,9 +197,9 @@ def dashboard():
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   *{{margin:0;padding:0;box-sizing:border-box;}}
-  body{{background:#0A0F1E;color:#E0E6F0;font-family:Arial,sans-serif;padding:20px;}}
+  body{{background:#F4F6F9;color:#1A1A2E;font-family:Arial,sans-serif;padding:20px;}}
   h1{{text-align:center;color:#02C39A;font-size:22px;margin-bottom:4px;letter-spacing:1px;}}
-  .subtitle{{text-align:center;color:#64748B;font-size:11px;margin-bottom:20px;}}
+  .subtitle{{text-align:center;color:#555E6D;font-size:11px;margin-bottom:20px;}}
 
   /* ── CRITICAL ANIMATED BANNER ── */
   @keyframes pulse-border {{
@@ -223,7 +223,7 @@ def dashboard():
   }}
 
   .banner-critical{{
-    background:#1A0000;
+    background:#FFF0F0;
     border:2px solid #FF1744;
     border-radius:10px;
     padding:16px 20px;
@@ -246,7 +246,7 @@ def dashboard():
   }}
 
   .banner-caution{{
-    background:#1A0800;border:2px solid #FF6D00;border-radius:10px;
+    background:#FFF5EE;border:2px solid #FF6D00;border-radius:10px;
     padding:16px 20px;margin-bottom:14px;
     display:{"flex" if has_caution else "none"};
     align-items:center;gap:16px;
@@ -255,9 +255,9 @@ def dashboard():
 
   /* STAT CARDS */
   .cards{{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}}
-  .card{{flex:1;min-width:110px;background:#161B2E;border-radius:10px;padding:14px;text-align:center;border:1px solid #1E293B;}}
+  .card{{flex:1;min-width:110px;background:#FFFFFF;border-radius:10px;padding:14px;text-align:center;border:1px solid #D1D9E0;box-shadow:0 1px 4px rgba(0,0,0,0.07);}}
   .card .num{{font-size:32px;font-weight:bold;}}
-  .card .lbl{{font-size:10px;color:#64748B;margin-top:4px;}}
+  .card .lbl{{font-size:10px;color:#555E6D;margin-top:4px;}}
 
   /* SEVERITY PICTOGRAPH */
   .sev-row{{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}}
@@ -274,26 +274,26 @@ def dashboard():
   .sev-critical-active{{animation: pulse-card 1.4s ease-in-out infinite;}}
 
   /* GLOBAL MODEL */
-  .gm-row{{background:#161B2E;border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid #1E293B;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}}
-  .gm-label{{font-size:13px;font-weight:bold;color:#4FC3F7;margin-bottom:3px;}}
-  .gm-zones{{font-size:11px;color:#64748B;}}
+  .gm-row{{background:#FFFFFF;border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid #D1D9E0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}}
+  .gm-label{{font-size:13px;font-weight:bold;color:#1565C0;margin-bottom:3px;}}
+  .gm-zones{{font-size:11px;color:#555E6D;}}
   .gm-badge{{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:bold;background:{gm_bg};color:{gm_color};border:1px solid {gm_color};}}
 
   /* ALERT PANELS */
-  .section-title{{color:#4FC3F7;font-size:13px;font-weight:bold;margin:16px 0 8px 0;text-transform:uppercase;letter-spacing:0.5px;}}
+  .section-title{{color:#1565C0;font-size:13px;font-weight:bold;margin:16px 0 8px 0;text-transform:uppercase;letter-spacing:0.5px;}}
   .alert-panels{{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}}
-  .alert-box{{background:#161B2E;border-radius:10px;padding:14px;border:1px solid;}}
+  .alert-box{{background:#FFFFFF;border-radius:10px;padding:14px;border:1px solid;}}
   .alert-box h3{{font-size:11px;font-weight:bold;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;}}
   .alert-box table{{width:100%;border-collapse:collapse;}}
   .alert-box td,.alert-box th{{padding:5px 6px;font-size:10px;border-bottom:1px solid #1A2035;}}
 
   /* CHARTS */
   .charts{{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}}
-  .chart-box{{background:#161B2E;border-radius:10px;padding:14px;border:1px solid #1E293B;}}
-  .chart-title{{color:#4FC3F7;font-size:12px;font-weight:bold;margin-bottom:8px;}}
+  .chart-box{{background:#FFFFFF;border-radius:10px;padding:14px;border:1px solid #D1D9E0;}}
+  .chart-title{{color:#1565C0;font-size:12px;font-weight:bold;margin-bottom:8px;}}
 
   /* TABLE */
-  table.main{{width:100%;border-collapse:collapse;background:#161B2E;border-radius:10px;overflow:hidden;}}
+  table.main{{width:100%;border-collapse:collapse;background:#FFFFFF;border-radius:10px;overflow:hidden;}}
   table.main th{{background:#1C7293;padding:8px 10px;font-size:11px;text-align:left;color:#fff;}}
   table.main td{{padding:6px 10px;font-size:11px;border-bottom:1px solid #1A2035;}}
 
@@ -346,7 +346,7 @@ def dashboard():
 <div class="section-title">Severity Overview</div>
 <div class="sev-row">
 
-  <div class="sev-item" style="border-color:#02C39A;background:#001A10;">
+  <div class="sev-item" style="border-color:#02C39A;background:#F0FFF4;">
     <div class="sev-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#02C39A" stroke-width="2">
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
@@ -357,7 +357,7 @@ def dashboard():
     <div class="sev-lbl" style="color:#02C39A;">Normal</div>
   </div>
 
-  <div class="sev-item" style="border-color:#4FC3F7;background:#001428;">
+  <div class="sev-item" style="border-color:#4FC3F7;background:#EFF6FF;">
     <div class="sev-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4FC3F7" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
@@ -366,10 +366,10 @@ def dashboard():
       </svg>
     </div>
     <div class="sev-num" style="color:#4FC3F7;">{advisory_count}</div>
-    <div class="sev-lbl" style="color:#4FC3F7;">Anomaly</div>
+    <div class="sev-lbl" style="color:#4FC3F7;">Advisory</div>
   </div>
 
-  <div class="sev-item" style="border-color:#FF6D00;background:#1A0800;{"border-width:2px;" if has_caution else ""}">
+  <div class="sev-item" style="border-color:#FF6D00;background:#FFF5EE;{"border-width:2px;" if has_caution else ""}">
     <div class="sev-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
@@ -381,7 +381,7 @@ def dashboard():
     <div class="sev-lbl" style="color:#FF6D00;">Caution</div>
   </div>
 
-  <div class="sev-item" style="border-color:#FFD700;background:#1A1200;">
+  <div class="sev-item" style="border-color:#FFD700;background:#FFFDE7;">
     <div class="sev-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2">
         <polygon points="12 2 22 20 2 20"/>
@@ -393,7 +393,7 @@ def dashboard():
     <div class="sev-lbl" style="color:#FFD700;">Warning</div>
   </div>
 
-  <div class="sev-item {"sev-critical-active" if has_critical else ""}" style="border-color:#FF1744;background:#1A0000;{"border-width:2px;" if has_critical else ""}">
+  <div class="sev-item {"sev-critical-active" if has_critical else ""}" style="border-color:#FF1744;background:#FFF0F0;{"border-width:2px;" if has_critical else ""}">
     <div class="sev-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF1744" stroke-width="2.5">
         <polygon points="12 2 22 20 2 20"/>
@@ -500,10 +500,10 @@ function makeChart(id, label, data, color) {{
       }}]
     }},
     options: {{
-      plugins: {{ legend: {{ labels: {{ color:'#E0E6F0', font:{{ size:10 }} }} }} }},
+      plugins: {{ legend: {{ labels: {{ color:'#1A1A2E', font:{{ size:10 }} }} }} }},
       scales: {{
-        x: {{ ticks: {{ color:'#64748B', maxTicksLimit:8, font:{{ size:9 }} }}, grid:{{ color:'#1A2035' }} }},
-        y: {{ ticks: {{ color:'#64748B', font:{{ size:9  }} }}, grid:{{ color:'#1A2035' }} }}
+        x: {{ ticks: {{ color:'#64748B', maxTicksLimit:8, font:{{ size:9 }} }}, grid:{{ color:'#E2E8F0' }} }},
+        y: {{ ticks: {{ color:'#64748B', font:{{ size:9  }} }}, grid:{{ color:'#E2E8F0' }} }}
       }}
     }}
   }});
