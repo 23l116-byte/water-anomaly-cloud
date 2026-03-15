@@ -119,17 +119,17 @@ def dashboard():
     wqi_vals   = [r.get("wqi")       or 0 for r in readings]
     severities = [r.get("severity", "NORMAL") for r in readings]
 
-    # WATCH → ADVISORY
+    # WATCH → ANOMALY
     badge_map = {
         "NORMAL":   '<span style="background:#006644;padding:2px 9px;border-radius:8px;font-size:10px;color:#fff;font-weight:bold;">NORMAL</span>',
-        "ADVISORY": '<span style="background:#0D47A1;padding:2px 9px;border-radius:8px;font-size:10px;color:#fff;font-weight:bold;">ADVISORY</span>',
+        "ANOMALY": '<span style="background:#0D47A1;padding:2px 9px;border-radius:8px;font-size:10px;color:#fff;font-weight:bold;">ANOMALY</span>',
         "CAUTION":  '<span style="background:#BF360C;padding:2px 9px;border-radius:8px;font-size:10px;color:#fff;font-weight:bold;">CAUTION</span>',
         "WARNING":  '<span style="background:#F57F17;padding:2px 9px;border-radius:8px;font-size:10px;color:#000;font-weight:bold;">WARNING</span>',
         "CRITICAL": '<span style="background:#B71C1C;padding:2px 9px;border-radius:8px;font-size:10px;color:#fff;font-weight:bold;">CRITICAL</span>'
     }
     row_bg_map = {
         "NORMAL":   "",
-        "ADVISORY": 'style="background:#0A1628;color:#90CAF9;"',
+        "ANOMALY": 'style="background:#0A1628;color:#90CAF9;"',
         "CAUTION":  'style="background:#2D1200;color:#FFAB76;"',
         "WARNING":  'style="background:#2D2200;color:#FFE082;"',
         "CRITICAL": 'style="background:#2D0000;color:#FF8A80;"'
@@ -138,8 +138,8 @@ def dashboard():
     table_rows = ""
     for r in reversed(readings[-50:]):
         sev = r.get("severity", "NORMAL")
-        # map WATCH to ADVISORY in display
-        sev_display = "ADVISORY" if sev == "WATCH" else sev
+        # map WATCH to ANOMALY in display
+        sev_display = "ANOMALY" if sev == "WATCH" else sev
         table_rows += f"""
         <tr {row_bg_map.get(sev_display, row_bg_map.get(sev, ""))}>
             <td>{r.get('received_at','')}</td>
@@ -186,7 +186,7 @@ def dashboard():
             rows += f"<tr><td>{r.get('received_at','')}</td><td>{r.get('zone','')}</td><td>{r.get('anomaly_score','')}</td><td style='color:#FF8C00;font-weight:bold;'>{r.get('streak','')}</td></tr>"
         return rows
 
-    advisory_count = sev_counts.get("WATCH", 0) + sev_counts.get("ADVISORY", 0)
+    advisory_count = sev_counts.get("WATCH", 0) + sev_counts.get("ANOMALY", 0)
 
     html = f"""<!DOCTYPE html>
 <html>
@@ -484,7 +484,7 @@ const tdsVals   = {tds_vals};
 const turbVals  = {turb_vals};
 const wqiVals   = {wqi_vals};
 const sevs      = {severities};
-const colorMap  = {{NORMAL:'#02C39A',WATCH:'#4FC3F7',ADVISORY:'#4FC3F7',CAUTION:'#FF6D00',WARNING:'#FFD700',CRITICAL:'#FF1744'}};
+const colorMap  = {{NORMAL:'#02C39A',WATCH:'#4FC3F7',ANOMALY:'#4FC3F7',CAUTION:'#FF6D00',WARNING:'#FFD700',CRITICAL:'#FF1744'}};
 const ptColors  = sevs.map(s => colorMap[s] || '#02C39A');
 
 function makeChart(id, label, data, color) {{
