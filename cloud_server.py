@@ -102,7 +102,32 @@ def dashboard():
     gm_bg     = "#003D2B" if global_model is not None else "#3D1A00"
 
     from collections import Counter
+    import json as _json
     sev_counts = Counter(r.get("severity", "NORMAL") for r in readings)
+
+    # Summary stats
+    ph_list   = [r.get("ph")  or 0 for r in readings if r.get("ph")]
+    tds_list  = [r.get("tds") or 0 for r in readings if r.get("tds")]
+    wqi_list  = [r.get("wqi") or 0 for r in readings if r.get("wqi")]
+
+    ph_avg  = round(sum(ph_list) /len(ph_list),  2) if ph_list  else 0
+    tds_avg = round(sum(tds_list)/len(tds_list), 1) if tds_list else 0
+    wqi_avg = round(sum(wqi_list)/len(wqi_list), 1) if wqi_list else 0
+    ph_min  = round(min(ph_list),  2) if ph_list  else 0
+    ph_max  = round(max(ph_list),  2) if ph_list  else 0
+    wqi_min = round(min(wqi_list), 1) if wqi_list else 0
+    wqi_max = round(max(wqi_list), 1) if wqi_list else 0
+
+    # Progress bar percentages
+    total_nz = max(n_total, 1)
+    pct_normal   = round(sev_counts.get("NORMAL",  0)/total_nz*100)
+    pct_anomaly  = round(sev_counts.get("ANOMALY", 0)/total_nz*100) + round(sev_counts.get("WATCH",0)/total_nz*100)
+    pct_caution  = round(sev_counts.get("CAUTION", 0)/total_nz*100)
+    pct_warning  = round(sev_counts.get("WARNING", 0)/total_nz*100)
+    pct_critical = round(sev_counts.get("CRITICAL",0)/total_nz*100)
+
+    from datetime import datetime as _dt
+    last_updated = _dt.now().strftime("%d %b %Y  %H:%M:%S")
 
     wqi_alerts      = [r for r in readings if r.get("wqi_flag") == 1][-10:]
     behav_alerts    = [r for r in readings if r.get("prediction") == -1][-10:]
@@ -297,6 +322,120 @@ def dashboard():
   table.main th{{background:#1C7293;padding:11px 14px;font-size:12px;text-align:left;color:#fff;font-weight:600;}}
   table.main td{{padding:9px 14px;font-size:12px;border-bottom:1px solid #E2E8F0;}}
 
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInDown {{
+    from {{ opacity:0; transform:translateY(-20px); }}
+    to   {{ opacity:1; transform:translateY(0); }}
+  }}
+  @keyframes fadeInUp {{
+    from {{ opacity:0; transform:translateY(20px); }}
+    to   {{ opacity:1; transform:translateY(0); }}
+  }}
+  @keyframes fadeInLeft {{
+    from {{ opacity:0; transform:translateX(-20px); }}
+    to   {{ opacity:1; transform:translateX(0); }}
+  }}
+  @keyframes countUp {{
+    from {{ opacity:0; transform:scale(0.5); }}
+    to   {{ opacity:1; transform:scale(1); }}
+  }}
+  @keyframes slideInRow {{
+    from {{ opacity:0; transform:translateX(-10px); }}
+    to   {{ opacity:1; transform:translateX(0); }}
+  }}
+  @keyframes glowGreen {{
+    0%,100% {{ box-shadow:0 0 0 0 rgba(2,195,154,0.4); }}
+    50%      {{ box-shadow:0 0 16px 4px rgba(2,195,154,0.15); }}
+  }}
+  @keyframes glowOrange {{
+    0%,100% {{ box-shadow:0 0 0 0 rgba(255,109,0,0.4); }}
+    50%      {{ box-shadow:0 0 16px 4px rgba(255,109,0,0.2); }}
+  }}
+  @keyframes progressFill {{
+    from {{ width:0%; }}
+    to   {{ width:var(--pct); }}
+  }}
+  @keyframes rotateDot {{
+    0%   {{ transform:rotate(0deg)   translateX(18px) rotate(0deg);   }}
+    100% {{ transform:rotate(360deg) translateX(18px) rotate(-360deg);}}
+  }}
+
+  /* Apply fade-in to major sections */
+  h1               {{ animation: fadeInDown 0.6s ease both; }}
+  .cards           {{ animation: fadeInUp   0.5s ease 0.1s both; }}
+  .sev-row         {{ animation: fadeInUp   0.5s ease 0.2s both; }}
+  .gm-row          {{ animation: fadeInUp   0.5s ease 0.3s both; }}
+  .alert-panels    {{ animation: fadeInUp   0.5s ease 0.4s both; }}
+  .charts          {{ animation: fadeInUp   0.5s ease 0.5s both; }}
+  table.main       {{ animation: fadeInUp   0.5s ease 0.6s both; }}
+
+  /* Stat card number pop */
+  .card .num       {{ animation: countUp    0.5s cubic-bezier(0.34,1.56,0.64,1) 0.3s both; }}
+
+  /* Severity card numbers */
+  .sev-num         {{ animation: countUp    0.5s cubic-bezier(0.34,1.56,0.64,1) 0.4s both; }}
+
+  /* Glow on active severity cards */
+  .sev-normal-active  {{ animation: glowGreen  2.5s ease-in-out infinite; }}
+  .sev-caution-active {{ animation: glowOrange 2s   ease-in-out infinite; }}
+
+  /* Table row stagger */
+  table.main tbody tr {{
+    animation: slideInRow 0.3s ease both;
+  }}
+  table.main tbody tr:nth-child(1)  {{ animation-delay:0.05s; }}
+  table.main tbody tr:nth-child(2)  {{ animation-delay:0.10s; }}
+  table.main tbody tr:nth-child(3)  {{ animation-delay:0.15s; }}
+  table.main tbody tr:nth-child(4)  {{ animation-delay:0.20s; }}
+  table.main tbody tr:nth-child(5)  {{ animation-delay:0.25s; }}
+  table.main tbody tr:nth-child(6)  {{ animation-delay:0.30s; }}
+  table.main tbody tr:nth-child(7)  {{ animation-delay:0.35s; }}
+  table.main tbody tr:nth-child(8)  {{ animation-delay:0.40s; }}
+  table.main tbody tr:nth-child(9)  {{ animation-delay:0.45s; }}
+  table.main tbody tr:nth-child(10) {{ animation-delay:0.50s; }}
+
+  /* Alert panel stagger */
+  .alert-box {{
+    animation: fadeInLeft 0.4s ease both;
+  }}
+
+  /* Progress bar for severity distribution */
+  .prog-bar-wrap {{
+    background:#E8ECF0; border-radius:20px; height:8px;
+    overflow:hidden; margin-top:6px;
+  }}
+  .prog-bar {{
+    height:8px; border-radius:20px;
+    width:var(--pct);
+    animation: progressFill 1s cubic-bezier(0.4,0,0.2,1) 0.6s both;
+  }}
+
+  /* Spinning dot loader for last-updated */
+  .live-dot {{
+    display:inline-block; width:8px; height:8px;
+    background:#02C39A; border-radius:50%;
+    margin-right:6px; vertical-align:middle;
+    animation: pulse-card 1.5s ease-in-out infinite;
+  }}
+
+  /* Stats row */
+  .stats-row {{ display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }}
+  .stat-mini {{
+    flex:1; min-width:100px; background:#FFFFFF;
+    border-radius:10px; padding:12px 14px;
+    border:1px solid #D1D9E0;
+    box-shadow:0 1px 6px rgba(0,0,0,0.05);
+    animation: fadeInUp 0.5s ease 0.5s both;
+  }}
+  .stat-mini .sm-label {{ font-size:11px; color:#888; margin-bottom:4px; }}
+  .stat-mini .sm-val   {{ font-size:18px; font-weight:bold; color:#1565C0; }}
+
+  /* Last updated bar */
+  .last-updated {{
+    text-align:right; font-size:11px; color:#888;
+    margin-bottom:14px; animation: fadeInDown 0.5s ease 0.7s both;
+  }}
   @media(max-width:700px){{.alert-panels{{grid-template-columns:1fr;}}.charts{{grid-template-columns:1fr;}}}}
 </style>
 </head>
@@ -304,6 +443,16 @@ def dashboard():
 
 <h1>Water Quality Monitoring Dashboard</h1>
 
+<div class="last-updated"><span class="live-dot"></span>Last updated: {last_updated} &nbsp;|&nbsp; Auto-refreshes every 30 seconds</div>
+
+<!-- SUMMARY STATS ROW -->
+<div class="stats-row">
+  <div class="stat-mini"><div class="sm-label">Avg pH</div><div class="sm-val" style="color:#4FC3F7;">{ph_avg}</div></div>
+  <div class="stat-mini"><div class="sm-label">pH Range</div><div class="sm-val" style="color:#4FC3F7;">{ph_min} &ndash; {ph_max}</div></div>
+  <div class="stat-mini"><div class="sm-label">Avg TDS (ppm)</div><div class="sm-val" style="color:#FFD700;">{tds_avg}</div></div>
+  <div class="stat-mini"><div class="sm-label">Avg WQI</div><div class="sm-val" style="color:#02C39A;">{wqi_avg}</div></div>
+  <div class="stat-mini"><div class="sm-label">WQI Range</div><div class="sm-val" style="color:#02C39A;">{wqi_min} &ndash; {wqi_max}</div></div>
+</div>
 
 <!-- CRITICAL ANIMATED BANNER -->
 <div class="banner-critical">
@@ -355,6 +504,7 @@ def dashboard():
     </div>
     <div class="sev-num" style="color:#02C39A;">{sev_counts.get("NORMAL",0)}</div>
     <div class="sev-lbl" style="color:#02C39A;">Normal</div>
+    <div class="prog-bar-wrap"><div class="prog-bar" style="background:#02C39A;--pct:{pct_normal}%;"></div></div>
   </div>
 
   <div class="sev-item" style="border-color:#4FC3F7;background:#EFF6FF;">
@@ -379,6 +529,7 @@ def dashboard():
     </div>
     <div class="sev-num" style="color:#FF6D00;">{sev_counts.get("CAUTION",0)}</div>
     <div class="sev-lbl" style="color:#FF6D00;">Caution</div>
+    <div class="prog-bar-wrap"><div class="prog-bar" style="background:#FF6D00;--pct:{pct_caution}%;"></div></div>
   </div>
 
   <div class="sev-item" style="border-color:#FFD700;background:#FFFDE7;">
@@ -391,6 +542,7 @@ def dashboard():
     </div>
     <div class="sev-num" style="color:#FFD700;">{sev_counts.get("WARNING",0)}</div>
     <div class="sev-lbl" style="color:#FFD700;">Warning</div>
+    <div class="prog-bar-wrap"><div class="prog-bar" style="background:#FFD700;--pct:{pct_warning}%;"></div></div>
   </div>
 
   <div class="sev-item {"sev-critical-active" if has_critical else ""}" style="border-color:#FF1744;background:#FFF0F0;{"border-width:2px;" if has_critical else ""}">
@@ -403,6 +555,7 @@ def dashboard():
     </div>
     <div class="sev-num" style="color:#FF1744;">{sev_counts.get("CRITICAL",0)}</div>
     <div class="sev-lbl" style="color:#FF1744;">Critical</div>
+    <div class="prog-bar-wrap"><div class="prog-bar" style="background:#FF1744;--pct:{pct_critical}%;"></div></div>
   </div>
 
 </div>
