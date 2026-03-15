@@ -197,8 +197,8 @@ def dashboard():
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   *{{margin:0;padding:0;box-sizing:border-box;}}
-  body{{background:#F4F6F9;color:#1A1A2E;font-family:Arial,sans-serif;padding:20px;}}
-  h1{{text-align:center;color:#02C39A;font-size:22px;margin-bottom:4px;letter-spacing:1px;}}
+  body{{background:#F0F4F8;color:#1A1A2E;font-family:Arial,sans-serif;padding:28px 32px;}}
+  h1{{text-align:center;color:#02C39A;font-size:28px;margin-bottom:8px;letter-spacing:1.5px;font-weight:800;}}
   .subtitle{{text-align:center;color:#555E6D;font-size:11px;margin-bottom:20px;}}
 
   /* ── CRITICAL ANIMATED BANNER ── */
@@ -251,20 +251,20 @@ def dashboard():
     display:{"flex" if has_caution else "none"};
     align-items:center;gap:16px;
   }}
-  .banner-text .banner-sub{{font-size:12px;color:#aaa;margin-top:3px;}}
+  .banner-text .banner-sub{{font-size:13px;color:#666;margin-top:5px;}}
 
   /* STAT CARDS */
   .cards{{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}}
-  .card{{flex:1;min-width:110px;background:#FFFFFF;border-radius:10px;padding:14px;text-align:center;border:1px solid #D1D9E0;box-shadow:0 1px 4px rgba(0,0,0,0.07);}}
-  .card .num{{font-size:32px;font-weight:bold;}}
-  .card .lbl{{font-size:10px;color:#555E6D;margin-top:4px;}}
+  .card{{flex:1;min-width:140px;background:#FFFFFF;border-radius:14px;padding:22px 16px;text-align:center;border:1px solid #D1D9E0;box-shadow:0 2px 12px rgba(0,0,0,0.08);transition:transform 0.2s;}} .card:hover{{transform:translateY(-2px);}}
+  .card .num{{font-size:44px;font-weight:bold;line-height:1.1;}}
+  .card .lbl{{font-size:13px;color:#555E6D;margin-top:6px;font-weight:500;}}
 
   /* SEVERITY PICTOGRAPH */
   .sev-row{{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}}
-  .sev-item{{flex:1;min-width:110px;border-radius:10px;padding:12px;text-align:center;border:1px solid;}}
-  .sev-item .sev-icon{{margin-bottom:4px;}}
-  .sev-item .sev-num{{font-size:24px;font-weight:bold;}}
-  .sev-item .sev-lbl{{font-size:10px;margin-top:2px;}}
+  .sev-item{{flex:1;min-width:130px;border-radius:14px;padding:18px 12px;text-align:center;border:1px solid;box-shadow:0 2px 10px rgba(0,0,0,0.07);transition:transform 0.2s;}} .sev-item:hover{{transform:translateY(-2px);}}
+  .sev-item .sev-icon{{margin-bottom:8px;}}
+  .sev-item .sev-num{{font-size:38px;font-weight:bold;line-height:1.1;}}
+  .sev-item .sev-lbl{{font-size:13px;margin-top:4px;font-weight:600;letter-spacing:0.3px;}}
 
   /* CRITICAL SEV CARD ANIMATION */
   @keyframes pulse-card {{
@@ -274,28 +274,28 @@ def dashboard():
   .sev-critical-active{{animation: pulse-card 1.4s ease-in-out infinite;}}
 
   /* GLOBAL MODEL */
-  .gm-row{{background:#FFFFFF;border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid #D1D9E0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}}
-  .gm-label{{font-size:13px;font-weight:bold;color:#1565C0;margin-bottom:3px;}}
+  .gm-row{{background:#FFFFFF;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,0.06);margin-bottom:16px;border:1px solid #D1D9E0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}}
+  .gm-label{{font-size:15px;font-weight:bold;color:#1565C0;margin-bottom:4px;}}
   .gm-zones{{font-size:11px;color:#555E6D;}}
-  .gm-badge{{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:bold;background:{gm_bg};color:{gm_color};border:1px solid {gm_color};}}
+  .gm-badge{{padding:8px 20px;border-radius:20px;font-size:13px;font-weight:bold;background:{gm_bg};color:{gm_color};border:1px solid {gm_color};}}
 
   /* ALERT PANELS */
-  .section-title{{color:#1565C0;font-size:13px;font-weight:bold;margin:16px 0 8px 0;text-transform:uppercase;letter-spacing:0.5px;}}
+  .section-title{{color:#1565C0;font-size:14px;font-weight:bold;margin:20px 0 10px 0;text-transform:uppercase;letter-spacing:1px;}}
   .alert-panels{{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}}
-  .alert-box{{background:#FFFFFF;border-radius:10px;padding:14px;border:1px solid;}}
-  .alert-box h3{{font-size:11px;font-weight:bold;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;}}
+  .alert-box{{background:#FFFFFF;border-radius:14px;padding:18px;border:1px solid;box-shadow:0 2px 10px rgba(0,0,0,0.06);}}
+  .alert-box h3{{font-size:12px;font-weight:bold;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.8px;}}
   .alert-box table{{width:100%;border-collapse:collapse;}}
-  .alert-box td,.alert-box th{{padding:5px 6px;font-size:10px;border-bottom:1px solid #1A2035;}}
+  .alert-box td,.alert-box th{{padding:7px 8px;font-size:11px;border-bottom:1px solid #E2E8F0;}}
 
   /* CHARTS */
   .charts{{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}}
-  .chart-box{{background:#FFFFFF;border-radius:10px;padding:14px;border:1px solid #D1D9E0;}}
-  .chart-title{{color:#1565C0;font-size:12px;font-weight:bold;margin-bottom:8px;}}
+  .chart-box{{background:#FFFFFF;border-radius:14px;padding:18px;border:1px solid #D1D9E0;box-shadow:0 2px 10px rgba(0,0,0,0.06);}}
+  .chart-title{{color:#1565C0;font-size:14px;font-weight:700;margin-bottom:12px;}}
 
   /* TABLE */
   table.main{{width:100%;border-collapse:collapse;background:#FFFFFF;border-radius:10px;overflow:hidden;}}
-  table.main th{{background:#1C7293;padding:8px 10px;font-size:11px;text-align:left;color:#fff;}}
-  table.main td{{padding:6px 10px;font-size:11px;border-bottom:1px solid #1A2035;}}
+  table.main th{{background:#1C7293;padding:11px 14px;font-size:12px;text-align:left;color:#fff;font-weight:600;}}
+  table.main td{{padding:9px 14px;font-size:12px;border-bottom:1px solid #E2E8F0;}}
 
   @media(max-width:700px){{.alert-panels{{grid-template-columns:1fr;}}.charts{{grid-template-columns:1fr;}}}}
 </style>
@@ -330,7 +330,7 @@ def dashboard():
     </svg>
   </div>
   <div class="banner-text">
-    <div class="banner-title" style="color:#FF6D00;font-size:15px;font-weight:bold;">ATTENTION REQUIRED &mdash; ALERT</div>
+    <div class="banner-title" style="color:#FF6D00;font-size:17px;font-weight:bold;">ATTENTION REQUIRED &mdash; ALERT</div>
     <div class="banner-sub">Sustained behavioural deviation detected across 3 or more consecutive readings. Regulatory limits are currently met. Monitor closely.</div>
   </div>
 </div>
@@ -348,7 +348,7 @@ def dashboard():
 
   <div class="sev-item" style="border-color:#02C39A;background:#F0FFF4;">
     <div class="sev-icon">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#02C39A" stroke-width="2">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#02C39A" stroke-width="2">
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
         <polyline points="22 4 12 14.01 9 11.01"/>
       </svg>
@@ -359,7 +359,7 @@ def dashboard():
 
   <div class="sev-item" style="border-color:#4FC3F7;background:#EFF6FF;">
     <div class="sev-icon">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4FC3F7" stroke-width="2">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4FC3F7" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
         <line x1="12" y1="8" x2="12" y2="12"/>
         <circle cx="12" cy="16" r="1" fill="#4FC3F7"/>
@@ -371,7 +371,7 @@ def dashboard():
 
   <div class="sev-item" style="border-color:#FF6D00;background:#FFF5EE;{"border-width:2px;" if has_caution else ""}">
     <div class="sev-icon">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
         <line x1="12" y1="8" x2="12" y2="12"/>
         <circle cx="12" cy="16" r="1" fill="#FF6D00"/>
@@ -383,7 +383,7 @@ def dashboard():
 
   <div class="sev-item" style="border-color:#FFD700;background:#FFFDE7;">
     <div class="sev-icon">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2">
         <polygon points="12 2 22 20 2 20"/>
         <line x1="12" y1="9" x2="12" y2="13"/>
         <circle cx="12" cy="17" r="1" fill="#FFD700"/>
@@ -395,7 +395,7 @@ def dashboard():
 
   <div class="sev-item {"sev-critical-active" if has_critical else ""}" style="border-color:#FF1744;background:#FFF0F0;{"border-width:2px;" if has_critical else ""}">
     <div class="sev-icon">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF1744" stroke-width="2.5">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FF1744" stroke-width="2.5">
         <polygon points="12 2 22 20 2 20"/>
         <line x1="12" y1="9" x2="12" y2="13"/>
         <circle cx="12" cy="17" r="1" fill="#FF1744"/>
