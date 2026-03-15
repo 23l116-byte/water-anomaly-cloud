@@ -303,7 +303,7 @@ def dashboard():
 <body>
 
 <h1>Water Quality Monitoring Dashboard</h1>
-<p class="subtitle">Critical Water Infrastructure Anomaly Detection &nbsp;|&nbsp; Batch 20 &nbsp;|&nbsp; Auto-refreshes every 30 seconds</p>
+
 
 <!-- CRITICAL ANIMATED BANNER -->
 <div class="banner-critical">
