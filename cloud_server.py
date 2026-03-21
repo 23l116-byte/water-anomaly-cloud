@@ -347,19 +347,19 @@ def dashboard():
   <div class="sev-item" style="border-color:#4FC3F7;background:#EFF6FF;">
     <div class="sev-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4FC3F7" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#4FC3F7"/></svg></div>
     <div class="sev-num" style="color:#4FC3F7;">{advisory_count}</div>
-    <div class="sev-lbl" style="color:#4FC3F7;">Anomaly (cumulative)</div>
+    <div class="sev-lbl" style="color:#4FC3F7;">Anomaly</div>
     <div class="prog-bar-wrap"><div class="prog-bar" style="background:#4FC3F7;--pct:{pct_anomaly}%;"></div></div>
   </div>
   <div class="sev-item" style="border-color:#FF6D00;background:#FFF5EE;">
     <div class="sev-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#FF6D00"/></svg></div>
     <div class="sev-num" style="color:#FF6D00;">{sev_counts.get("CAUTION",0)}</div>
-    <div class="sev-lbl" style="color:#FF6D00;">Caution (cumulative)</div>
+    <div class="sev-lbl" style="color:#FF6D00;">Caution</div>
     <div class="prog-bar-wrap"><div class="prog-bar" style="background:#FF6D00;--pct:{pct_caution}%;"></div></div>
   </div>
   <div class="sev-item" style="border-color:#FFD700;background:#FFFDE7;">
     <div class="sev-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2"><polygon points="12 2 22 20 2 20"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="1" fill="#FFD700"/></svg></div>
     <div class="sev-num" style="color:#FFD700;">{sev_counts.get("WARNING",0)}</div>
-    <div class="sev-lbl" style="color:#FFD700;">Warning (cumulative)</div>
+    <div class="sev-lbl" style="color:#FFD700;">Warning</div>
     <div class="prog-bar-wrap"><div class="prog-bar" style="background:#FFD700;--pct:{pct_warning}%;"></div></div>
   </div>
   <div class="{critical_anim_class} sev-item" style="border-color:#FF1744;background:#FFF0F0;">
